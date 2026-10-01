@@ -2,7 +2,7 @@
 
 Exploratory research into whether the relationship between consecutive QQQ daily highs and lows contains information about next-day price behavior, and whether any observed relationship can be used before the next session closes.
 
-This is a research notebook, not a trading system. It does not implement a strategy backtest, model transaction costs, or establish that any reported relationship is profitable.
+This is an exploratory research notebook, not a production trading system. It includes backtest validation findings and a trade-stream replication, but does not include the referenced `main.py` strategy implementation. Reported performance claims have not been independently verified from saved notebook outputs.
 
 ## Research Question
 
@@ -15,13 +15,13 @@ It compares next-day candle direction, range expansion, wick structure, and open
 
 ## Project Contents
 
-- `research_assistant.ipynb`: QuantConnect Research notebook containing data retrieval, feature construction, exploratory statistics, classification experiments, conditional-probability analyses, and an intraday checkpoint study.
+- `research_assistant.ipynb`: QuantConnect Research notebook containing data retrieval, feature construction, exploratory statistics, classification experiments, conditional-probability analyses, an intraday checkpoint study, backtest validation notes, and trade-stream replication/gain-chart analysis.
 
 ## Data and Environment
 
 The notebook uses QuantConnect's `QuantBook` API and therefore must be run in a QuantConnect Research environment with access to QQQ, VIX, and minute-resolution QQQ history. It is not a standalone notebook that can run with only a local market-data CSV.
 
-The analysis requests daily QQQ and VIX data from January 2006 through September 30, 2026, and minute QQQ data from October 2024 through September 29, 2026. The notebook also uses the following Python libraries:
+The analysis requests daily QQQ and VIX data from January 2006 through September 30, 2026, minute QQQ data from October 2024 through September 29, 2026, and hourly QQQ data from January 2007 through September 30, 2026. The notebook also uses the following Python libraries:
 
 - pandas
 - NumPy
@@ -40,10 +40,11 @@ QuantConnect provides the `QuantBook`, `Resolution`, and data-access interfaces 
 4. Select candidate features and compare five classifiers using expanding-window walk-forward splits.
 5. Examine conditional probabilities and logistic relationships by VIX regime and time segment.
 6. Explore first-touch and fixed-time intraday signals using minute bars.
+7. Document a separate hourly backtest validation and replicate its trade stream for gain-chart analysis.
 
 ## Findings Recorded in the Notebook
 
-The notebook's narrative reports that lagged, close-of-day features did not beat the majority-class baseline, while contemporaneous daily invasion measures were strongly associated with next-day candle structure. Its later intraday analysis reports a relationship between the running invasion measure at fixed afternoon checkpoints and the eventual candle direction.
+The notebook's narrative reports that lagged, close-of-day features did not beat the majority-class baseline, while contemporaneous daily invasion measures were strongly associated with next-day candle structure. Its later intraday analysis reports a relationship between the running invasion measure at fixed afternoon checkpoints and the eventual candle direction. The added backtest section reports positive total return but negative Sharpe and describes trading costs as consuming most gross profit; its trade-stream analysis reports losses on the short side and most gains in the mid-VIX regime.
 
 These are notebook-authored claims, not independently verified results: **none of the notebook cells have been executed, and no cell outputs are stored in the file.** Re-run the analysis and validate the calculations before relying on any figures or conclusions.
 
@@ -52,13 +53,13 @@ These are notebook-authored claims, not independently verified results: **none o
 - **Walk-forward results are not fully out-of-sample.** Correlations and decision-tree importances are calculated using the complete modeling frame before the walk-forward splits. The test periods therefore influence feature selection. Perform feature selection independently within each training window, or predefine features using a separate training period, before interpreting reported test accuracy.
 - **Intraday thresholds use full-history data.** The notebook applies quintile cut points estimated from the full daily sample to the more recent minute-bar study. Re-estimate thresholds using data available before each evaluation period to avoid look-ahead.
 - **Conclusions are unverified.** The notebook includes prose with numerical findings, but its code cells have not been run and the file contains no outputs to reproduce those numbers.
-- **No trading performance is established.** There is no portfolio simulation, execution model, transaction-cost estimate, or risk-adjusted performance analysis.
+- **Backtest evidence is incomplete and unverified.** The performance table is narrative content from a separate QuantConnect run; the referenced `main.py` strategy is not included here. The notebook's trade-stream replication does not by itself reproduce the full portfolio equity curve, fills, or fees. None of the notebook cells have saved outputs.
 - **Data access and date coverage matter.** Results depend on QuantConnect's history availability, timestamps, symbol settings, and the actual current data coverage in the Research environment. Confirm returned date ranges rather than assuming the requested end date is fully available.
-- **The final cell adds SPY without further analysis.** It appears to be a leftover setup cell and is not part of the documented QQQ/VIX workflow.
+- **An intermediate cell adds SPY without further analysis.** It appears to be a leftover setup cell and is not part of the documented QQQ/VIX workflow.
 
 ## Suggested Validation Before Further Use
 
 1. Run the notebook from top to bottom in QuantConnect Research and inspect each data pull, assertion, model fit, and chart.
 2. Fix feature-selection leakage by fitting selection only on each training window, then rerun all walk-forward evaluations.
 3. Use time-ordered, training-only threshold estimation for the intraday analysis and report sample sizes and uncertainty for each bucket.
-4. Keep any strategy claims provisional until a separate, leakage-aware backtest includes realistic execution, costs, and risk controls.
+4. Reproduce the referenced backtest end to end, reconcile its trade-count difference against the notebook replication, and keep strategy claims provisional until costs, execution, and risk controls are independently validated.
